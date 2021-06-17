@@ -5,23 +5,27 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 
+let users = [];
+
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
 io.on('connection', (socket) => {
-    console.log('a user connected: ' + socket.id);
-    socket.on('chat message', (msg) => {
-        console.log(socket.id + ' sent message: ' + msg);
-    });
+    users.push(socket.id);
 
-    socket.on('disconnect', () => {
-      console.log('user disconnected: ' + socket.id);
-    });
+    io.emit('update users', users);
 
     socket.on('chat message', (msg) => {
         io.emit('chat message', msg, socket.id);
     });
+
+    socket.on('disconnect', () => {
+      users = users.filter(user => user !== socket.id);
+      console.log(users);
+      io.emit('update users', users);
+    });
+
 });
 
 server.listen(3000, () => {
