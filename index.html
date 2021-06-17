@@ -16,13 +16,54 @@
     </style>
   </head>
   <body>
+    <script>
+      // class User {
+      //   constructor(id) {
+      //     this.id = id;
+      //   }
+      //   name;
+      //   addName(n) {
+      //     this.name = n;
+      //   }
+      // }
+
+      // let t = new User(123);
+      // t.addName('Kalvin');
+      // let users = {};
+      // users[123] = t;
+
+      // var user = document.createElement('li');
+      // // if (users[i].name != '') {
+      // //   user.textContent = users[i].name;
+      // // } else {
+      // //   user.textContent = users[i].id;
+      // // }
+
+      // user.textContent = users[0].id;
+      // let test = document.getElementById('test')
+      // test.appendChild(user);
+    </script>
+
+    <div>
+      <ul id='test'></ul>
+    </div>
+
     <div>
       <ul id='userList'></ul>
     </div>
+
+    <div>
+      <form id="nameform" action="">
+        <input id="nameinput" autocomplete="off" /><button>Make Name</button>
+      </form>
+    </div>
+
     <ul id="messages"></ul>
+
     <form id="form" action="">
       <input id="input" autocomplete="off" /><button>Send</button>
     </form>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var socket = io();
@@ -32,26 +73,44 @@
         var input = document.getElementById('input');
         var userList = document.getElementById('userList');
 
+        var nform = document.getElementById('nameform');
+        var ninput = document.getElementById('nameinput');
+
+        nform.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (ninput.value) {
+              console.log(ninput.value);
+              socket.emit('added name', ninput.value);
+              ninput.value = '';
+            }
+        });
+
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             if (input.value) {
-            socket.emit('chat message', input.value);
-            input.value = '';
+              socket.emit('chat message', input.value);
+              input.value = '';
             }
         });
 
         socket.on('chat message', function(msg, id) {
-        var item = document.createElement('li');
-        item.textContent = id + ': ' + msg;
-        messages.appendChild(item);
-        //window.scrollTo(0, document.body.scrollHeight);
+          var item = document.createElement('li');
+          item.textContent = id + ': ' + msg;
+          messages.appendChild(item);
+          //window.scrollTo(0, document.body.scrollHeight);
         });
 
         socket.on('update users', (users) => {
           while(userList.firstChild) userList.removeChild(userList.firstChild);
           for (let i = 0; i < users.length; i++) {
             var user = document.createElement('li');
-            user.textContent = users[i];
+            if (users[i].name != null) {
+              user.textContent = users[i].name;
+            } else {
+              user.textContent = users[i].id;
+            }
+
+            //user.textContent = users[i].id;
             userList.appendChild(user);
             //window.scrollTo(0, document.body.scrollHeight);
           }
