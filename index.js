@@ -21,6 +21,7 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
 });
 
+//TODO: add functionality for rooms
 io.on('connection', (socket) => {
     users.push(new User(socket.id));
 
